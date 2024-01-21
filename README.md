@@ -1,4 +1,4 @@
-Final points = 0.4 * (Average of HW | Medians of HW) + 0.6 * Exam
+Final points = 0.4 * (Average of HW | Medians of HW) + 0.6 * Exam 
 
 ### List, Deque, Vector performance measured times
 
