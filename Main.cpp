@@ -34,43 +34,20 @@ using namespace std;
 }
 
 int main() {
-    cout << "Load file with (1) 10K (2) 100K records: ";
-    int fileNum;
-    cin >> fileNum;
+    cout << "Loading file ...";
 
-    list<Person> passedStudents;
-    deque<Person> failedStudents;
+    list<Person> passed;
+    deque<Person> failed;
 
-    cout << "Enter homework final score calculation type (`a` for average, `m` for median): ";
-    string hwFinalScoreTypeInput;
-    cin >> hwFinalScoreTypeInput;
-    HomeworkFinalScoreType hwFinalScoreType;
-    if (hwFinalScoreTypeInput == "a") {
-        hwFinalScoreType = AVERAGE;
-    } else if (hwFinalScoreTypeInput == "m") {
-        hwFinalScoreType = MEDIAN;
-    } else {
-        throw invalid_argument("Homework final score calculation type should be either `a` (average) or `m` (median)");
-    }
+    cout << "Enter homework final score calculation method (`a` for average, `m` for median): ";
+    char average_or_median_input;
+    cin >> average_or_median_input;
 
     ifstream file;
-    string input_filename;
-    try {
-        if (fileNum == 1) {
-            input_filename = "students10000.txt";
-        } else if (fileNum == 2) {
-            input_filename = "students100000.txt";
-        } else {
-            throw invalid_argument("File number should be in the acceptable range.");
-        }  
-    } catch(runtime_error &e) {
-        cout << "Error: " << e.what() << endl;
-    }
-      
 
     cout << "Measuring time for file load operation:\n";
     MEASURE_TIME(openning_file, {
-        file.open(input_filename);
+        file.open("students.txt");
     });
 
 
@@ -81,64 +58,58 @@ int main() {
     int numOfStudents = 0;
     while(getline(file, line)) {
         istringstream iss(line);
-        Person student(hwFinalScoreType);
+        Person student(average_or_median_input);
         iss >> student;
         ++numOfStudents;
         if (student.passed()) {
-            passedStudents.push_back(student);
+            passed.push_back(student);
         } else {
-            failedStudents.push_back(student);
+            failed.push_back(student);
         }
     }
 
     // Output students to standard output
-    // string finalPointTitle;
-    // if (hwFinalScoreType == AVERAGE) {
-    //     finalPointTitle = "Final_Point(Ave.)";
-    // } else {
-    //         finalPointTitle = "Final_Point(Med.)";
-    // }
-    // cout << left << setw(25) << "Name" <<  setw(25) << "Surname" << setw(25) << finalPointTitle << endl;
-    // cout << "------------------------------------------------------------------------------" << endl;
+    string finalPointTitle;
+    if (average_or_median_input == 'a') {
+        finalPointTitle = "Final_Point(Ave.)";
+    } else {
+            finalPointTitle = "Final_Point(Med.)";
+    }
+    cout << left << setw(25) << "Name" <<  setw(25) << "Surname" << setw(25) << finalPointTitle << endl;
+    cout << "------------------------------------------------------------------------------" << endl;
 
-    // cout << "Measuring time for standard outputs:\n";
-    // MEASURE_TIME(standard_output, {
-    //     cout << "• Passed:\n";
-    //     list<Person>::iterator it;
-    //     for (it = passedStudents.begin(); it != passedStudents.end(); it++)
-    //     {
-    //         Person p = *it;
-    //         cout << p << endl;
-    //     }
+    cout << "• Passed:\n";
+        list<Person>::iterator it;
+        for (it = passed.begin(); it != passed.end(); it++)
+        {
+            Person p = *it;
+            cout << p << endl;
+        }
 
-    //     cout << "• Failed:\n";
-    //     for (int i = 0; i < failedStudents.size(); i++) {
-    //         cout << failedStudents[i] << endl;
-    //     }
-    // });
-
+        cout << "• Failed:\n";
+        for (int i = 0; i < failed.size(); i++) {
+            cout << failed[i] << endl;
+        }
     cout << "Measuring time for file outputs:\n";
     MEASURE_TIME(file_output,{
         // Output students vector to files
         ofstream output_passed_file("./passed.txt");
         list<Person>::iterator it;
-        for (it = passedStudents.begin(); it != passedStudents.end(); it++)
+        for (it = passed.begin(); it != passed.end(); it++)
         {
             Person p = *it;
             output_passed_file << p << "\n";
         }
-        cout << "File passed.txt was generated!" << endl;
         output_passed_file.close();
 
         ofstream output_failed_file("./failed.txt");
-        for (int i = 0; i < failedStudents.size(); ++i) {
-            output_failed_file << failedStudents[i] << "\n";
+        for (int i = 0; i < failed.size(); ++i) {
+            output_failed_file << failed[i] << "\n";
         }
-        cout << "File failed.txt was generated!" << endl;
         output_failed_file.close();
     });
 
-    
+
     file.close();
 
     return 0;
